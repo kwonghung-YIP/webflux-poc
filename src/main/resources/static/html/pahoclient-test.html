@@ -1,0 +1,69 @@
+<!DOCTYPE html> 
+
+<html lang="en">
+    <head>
+    	<meta charset="utf-8"/>
+        <title>Paho client test page</title>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.js" type="text/javascript"></script>
+        <!--
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.1/mqttws31.min.js" type="text/javascript"></script>
+        -->
+    </head>
+    <body>
+        <script type="text/javascript">
+        	const hostname = "test.mosquitto.org";
+        	const port = 8091;//8081;
+        	//const username = "rw";
+        	//const password = "readwrite";
+        	const username = "ro";
+        	const password = "readonly";
+			const client = new Paho.MQTT.Client(hostname, port, "hungfromhktest20210901");
+			
+			
+			client.onConnected = (reconnect,uri) => {
+				console.log(`mqtt client connected to ${uri} ${reconnect}`);
+			};
+			
+			client.onConnectionLost = (resp) => {
+				console.log(`onConnectionLost: ${resp.errorCode}:${resp.errorMessage}`)	
+			};
+			
+			client.onMessageArrived = (msg) => {
+				console.log(`message [${msg.payloadString}] received from topic [${msg.destinationName}]`);
+				let qos = 1; //0-best effort, 1-at least once, 2-exactly once
+				client.startTrace();
+				client.send("hungtest-reply",`Reply from ${client.clientId}`,qos);
+				client.stopTrace();
+				console.log(client.getTraceLog());
+			};
+			
+			client.onMessageDelivered = (msg) => {
+				console.log(`message [${msg.payloadString}] sent to topic [${msg.destinationName}]`);
+			};
+			
+			//Connect to test.mosquitto.org with secured websocket protocol, 
+			//otherwise will be blocked by browser security policy
+			client.connect({
+				useSSL: true,
+				userName: username,
+				password: password,
+				mqttVersion: 4, //3-MQTT V3.1, 4-MQTT V3.1.1
+				onSuccess: (ctx) => {
+					console.log("mqtt client successfully connected");
+					client.subscribe("hungtest-send", {
+						onSuccess: () => {
+							console.log("subscribe success");
+						},
+						onFailure: () => {
+							console.log("subscribe failure");
+						}
+					});
+				},
+				onFailure: (ctx,errCode,errMsg) => {
+					console.error(`mqtt client connection failure: ${errCode}:${errMsg}`)
+				},
+			});
+			
+        </script>
+    </body>
+</html>

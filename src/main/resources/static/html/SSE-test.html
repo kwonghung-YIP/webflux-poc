@@ -1,0 +1,27 @@
+<!DOCTYPE html> 
+
+<html lang="en">
+    <head>
+    	<meta charset="utf-8"/>
+        <title>POC for Server Sent Event</title>
+    </head>
+    <body>
+        <script type="text/javascript">       	
+            let eventSrc = new EventSource("/text-stream");
+
+            eventSrc.onopen = (e) => {
+                console.log("start listening to eventSource...");
+            };
+            
+            eventSrc.addEventListener('message',(msg) => {
+                console.log(`received ${msg.type}:[${msg.data}]`);
+            });
+
+            setTimeout(() => {
+				console.log("close event source...")
+                eventSrc.close();
+            },1000*60*5)
+
+        </script>
+    </body>
+</html>

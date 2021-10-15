@@ -1,0 +1,16 @@
+# seems the following static content properties were ignored
+#spring:
+#  webflux:#    static-path-pattern: /**
+
+server:
+  http2:
+    enabled: true  
+  ssl: 
+    key-store: classpath:my-service.p12
+    key-store-type: PKCS12
+    key-store-password: abcd1234
+    key-alias: my-cert   
+
+logging:
+  level:
+    web: debug
